@@ -6,22 +6,22 @@ include "alldifferent.mzn";
 %----------------------------
 
 %restricción a)
-constraint abs(capas[2] - capas[1]) > 1;
-constraint abs(capas[2] - capas[5]) > 1;
-constraint abs(capas[2] - capas[9]) > 1;
-constraint abs(capas[2] - capas[13]) > 1;
+constraint abs(capas[2] - capas[1]) != 1;
+constraint abs(capas[2] - capas[5]) != 1;
+constraint abs(capas[2] - capas[9]) != 1;
+constraint abs(capas[2] - capas[13]) != 1;
 
  %restricción b)
-constraint  forall(i in 1..9 where i!=3) (abs(capas[3] - capas[i]) != 1);
+constraint  forall(i in 1..9 where i!=7) (abs(capas[7] - capas[i]) != 1);
 
 %restricción c)
-constraint abs(capas[4] - capas[13]) >= 4;
+constraint abs(capas[4] - capas[13]) >= 5;
 
 %restricción d)
 constraint abs(capas[8] - capas[17]) = 2;
 
 %restricción e) (en esta hay contradicción con la h)
-%constraint abs(capas[5] - capas[14]) = 1;
+constraint abs(capas[5] - capas[14]) = 1;
 
 %restricción f)
 constraint abs(capas[4] - capas[1]) = 1 \/ abs(capas[4] - capas[10]) = 1 \/ abs(capas[4] - capas[9]) = 1 \/ abs(capas[4] - capas[18]) = 1;
@@ -30,13 +30,13 @@ constraint abs(capas[4] - capas[1]) = 1 \/ abs(capas[4] - capas[10]) = 1 \/ abs(
 constraint abs(capas[6] - capas[7]) != 1;
 
 %restricción h) la ultima parte contradice a la restricción e)
-constraint abs(capas[5] - capas[13]) = 1 \/ abs(capas[5] - capas[17]) = 1 \/ abs(capas[5] - capas[2]) = 1 \/ abs(capas[5] - capas[3]) = 1 \/ abs(capas[5] - capas[7]) = 1; %/\ abs(capas[5] - capas[14]) != 1;
+constraint (abs(capas[5] - capas[13]) = 1 \/ abs(capas[5] - capas[17]) = 1 \/ abs(capas[5] - capas[2]) = 1 \/ abs(capas[5] - capas[3]) = 1 \/ abs(capas[5] - capas[7]) = 1) /\ abs(capas[6] - capas[14]) != 1;
 
 %restricción i)
 constraint forall(i,j in 1..9 where i > j) (capas[i] > capas[j]);
 
 %restricción j)
-constraint forall(i,j in 10..16 where i > j) (capas[i] < capas[j]);
+constraint forall(i,j in 10..15 where i > j) (capas[i] < capas[j]);
 
 %restricción de validez, todas las capas son diferentes
 constraint alldifferent (i in 1..18) (capas[i]);
@@ -45,6 +45,7 @@ constraint alldifferent (i in 1..18) (capas[i]);
 
 solve satisfy;
 %solve minimize (abs(capas[8] - capas[9]) + abs(capas[10] - capas[11]));
+%solve minimize abs(capas[7] - capas[16]) / abs(capas[3] - capas[18]);
 
 %----------------------------
 output["E1A en capa : ", show(capas[1]), "\n",
