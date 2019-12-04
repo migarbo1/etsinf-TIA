@@ -97,6 +97,8 @@
 		(fuzzify temperatura ?Tmax 0.1) ;assert temp
 		(fuzzify temperatura ?Tmin 0.1) ;
 		(fuzzify densidad_trafico ?Dtraf 0.1)
+
+    (assert (carretera (identificador ?Rid) (nivel_agrietamiento ?Rlvl) (tmax ?Tmax) (tmin ?Tmin) (d_trafico ?Dtraf) (prioridad 0.0)))
 )
 (defrule fria_ligero
 	(temperatura fria)
@@ -175,7 +177,10 @@
 
 
 (defrule defuzzify (declare (salience -1)) (necesidad_reasfaltado ?nec)
+?c <- (carretera (identificador ?Rid) (nivel_agrietamiento ?Rlvl) (tmax ?Tmax) (tmin ?Tmin) (d_trafico ?Dtraf) (prioridad ?p))
 =>
-(printout T "Necesidad de reasfaltado: " (maximum-defuzzify ?nec) crlf) ;;moment-defuzzify
+(bind ?p (moment-defuzzify ?nec))
+(modify ?c (prioridad ?p))
+(printout T "Necesidad de reasfaltado: " ?p crlf) ;;maximum-defuzzify
 (halt)
 )

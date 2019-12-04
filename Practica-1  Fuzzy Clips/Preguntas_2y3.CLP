@@ -32,6 +32,7 @@
 	(slot tmax(type FLOAT))
 	(slot tmin(type FLOAT))
 	(slot d_trafico(type INTEGER))
+  (slot precipitaciones_ano (type INTEGER)) ;;;;pregunta 3 a) ;;;;;
 	(slot prioridad(type FLOAT))
 
 )
@@ -40,6 +41,7 @@
 	0 300 coches
 	(
 	(baja(Z 20 80))
+  (media(PI 50 150)) ;;;;;;;;Pregunta 2 a);;;;;;;;;
 	(alta(S 120 250))
 	)
 )
@@ -72,10 +74,18 @@
 	)
 )
 
+;;;;;;;;;;;;; pregunta 3 a) ;;;;;;;;;;;;;;;
+(deftemplate precipitaciones
+  0 1000 litros/ano
+  (
+    (poca (200 1)(300 0))
+    (media (PI 250 550))
+    (alta (500 0)(650 1))
+  )
+)
+
 ;leemos nivel, fusificamos sober agrietamietno. leemos temperatura max i min y fusificamos(fuzzify) sobre temperatura
 ;con anchura 0.1
-
-;9 reglas
 
 ;reglas
 (defrule readFromConsole (declare (salience 10))
@@ -91,12 +101,17 @@
 		(bind ?Tmin (read))
 		(printout T "introduzca la densidad de tr�fico de la carretera " crlf)
 		(bind ?Dtraf (read))
+    (printout T "introduzca lacantidad de precipitaciones en un año " crlf) ;;;;;Pregunta 3 a);;;;;;
+		(bind ?prec (read)) ;;;;;Pregunta 3 a);;;;;;
 		;
 		;
 		(fuzzify agrietamiento ?Rlvl 0.1) ;assertlvl agrietamiento
 		(fuzzify temperatura ?Tmax 0.1) ;assert temp
 		(fuzzify temperatura ?Tmin 0.1) ;
 		(fuzzify densidad_trafico ?Dtraf 0.1)
+    (fuzzify precipitaciones ?prec 0.1) ;;;;;Pregunta 3 a);;;;;;
+
+    (assert (carretera (identificador ?Rid) (nivel_agrietamiento ?Rlvl) (tmax ?Tmax) (tmin ?Tmin) (d_trafico ?Dtraf) (prioridad 0.0) (precipitaciones_ano ?prec)))
 )
 (defrule fria_ligero
 	(temperatura fria)
@@ -173,9 +188,34 @@
 	(assert (necesidad_reasfaltado more-or-less baja))
 )
 
+;;;;;;;;Pregunta 3 b);;;;;;;;;
+(defrule lluvia_alta
+  (precipitaciones alta)
+  =>
+  (assert (necesidad_reasfaltado extremely urgente))
+)
+
+;;;;;;;;;;;;;;;;Pregunta 2 a) ;;;;;;;;;;;;;;;;;;;;;;
+(defrule dens_media
+	(densidad_trafico media)
+	=>
+	(assert (necesidad_reasfaltado more-or-less urgente))
+)
+
+;;;;;;;;;;;;;;;;Pregunta 2 b) ;;;;;;;;;;;;;;;;;;;
+(defrule alerta
+  (densidad_trafico alta)
+  ?c <- (carretera (identificador ?Rid) (nivel_agrietamiento ?Rlvl) (tmax ?Tmax) (tmin ?Tmin) (d_trafico ?Dtraf) (prioridad ?p))
+  =>
+  (printout T "precaución por tráfico alto en la carretera  " ?Rid crlf)
+)
+
 
 (defrule defuzzify (declare (salience -1)) (necesidad_reasfaltado ?nec)
+?c <- (carretera (identificador ?Rid) (nivel_agrietamiento ?Rlvl) (tmax ?Tmax) (tmin ?Tmin) (d_trafico ?Dtraf) (prioridad ?p))
 =>
-(printout T "Necesidad de reasfaltado: " (maximum-defuzzify ?nec) crlf) ;;moment-defuzzify
+(bind ?p (moment-defuzzify ?nec))
+(modify ?c (prioridad ?p))
+(printout T "Necesidad de reasfaltado: " ?p crlf) ;;maximum-defuzzify
 (halt)
 )
